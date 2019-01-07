@@ -1,0 +1,21 @@
+{
+    "name": "casbin/cake-adapter",
+    "keywords": ["casbin", "cakephp", "casbin-adapter", "database"],
+    "description": "Use casbin in CakePHP. ",
+    "authors": [
+        {
+            "name": "TechLee",
+            "email": "techlee@qq.com"
+        }
+    ],
+    "license": "Apache-2.0",
+    "require": {
+    	"cakephp/cakephp": "3.*",
+    	"casbin/casbin": "0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "CasbinAdapter\\Cake\\": "src/"
+        }
+    }
+}
