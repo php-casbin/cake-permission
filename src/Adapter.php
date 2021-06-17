@@ -35,18 +35,21 @@ class Adapter implements AdapterContract
         $this->table->save($entity);
     }
 
-    public function loadPolicy($model)
+    public function loadPolicy($model): void
     {
         $rows = $this->table->find();
 
         foreach ($rows as $row) {
             $array = $row->toArray();
+            $array = array_filter($array, function ($value) {
+                return !is_null($value) && $value !== '';
+            });
             $line = implode(', ', array_slice(array_values($array), 1));
             $this->loadPolicyLine(trim($line), $model);
         }
     }
 
-    public function savePolicy($model)
+    public function savePolicy($model): void
     {
         foreach ($model->model['p'] as $ptype => $ast) {
             foreach ($ast->policy as $rule) {
@@ -59,16 +62,14 @@ class Adapter implements AdapterContract
                 $this->savePolicyLine($ptype, $rule);
             }
         }
-
-        return true;
     }
 
-    public function addPolicy($sec, $ptype, $rule)
+    public function addPolicy($sec, $ptype, $rule): void
     {
-        return $this->savePolicyLine($ptype, $rule);
+        $this->savePolicyLine($ptype, $rule);
     }
 
-    public function removePolicy($sec, $ptype, $rule)
+    public function removePolicy($sec, $ptype, $rule): void
     {
         $entity = $this->table->newEntity();
 
@@ -76,10 +77,10 @@ class Adapter implements AdapterContract
             $entity->set('v'.strval($key), $value);
         }
 
-        return $this->table->delete($entity);
+        $this->table->delete($entity);
     }
 
-    public function removeFilteredPolicy($sec, $ptype, $fieldIndex, ...$fieldValues)
+    public function removeFilteredPolicy($sec, $ptype, $fieldIndex, ...$fieldValues) :void
     {
         throw new CasbinException('not implemented');
     }
