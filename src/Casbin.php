@@ -27,7 +27,7 @@ class Casbin
         $config = Configure::consume('Casbin');
 
         $this->config = $this->mergeConfig(
-            require_once dirname(__DIR__).'/config/casbin.php',
+            require dirname(__DIR__).'/config/casbin.php',
             $config
         );
         if (is_string($config['adapter'])) {

@@ -4,6 +4,7 @@ namespace CasbinAdapter\Cake;
 
 use Casbin\Exceptions\CasbinException;
 use Casbin\Persist\Adapter as AdapterContract;
+use Casbin\Persist\BatchAdapter as BatchAdapterContract;
 use Casbin\Persist\AdapterHelper;
 use Cake\ORM\TableRegistry;
 use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
@@ -13,7 +14,7 @@ use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
  *
  * @author techlee@qq.com
  */
-class Adapter implements AdapterContract
+class Adapter implements AdapterContract, BatchAdapterContract
 {
     use AdapterHelper;
 
@@ -83,6 +84,54 @@ class Adapter implements AdapterContract
     public function removeFilteredPolicy($sec, $ptype, $fieldIndex, ...$fieldValues) :void
     {
         throw new CasbinException('not implemented');
+    }
+
+    /**
+     * Adds a policy rules to the storage.
+     * This is part of the Auto-Save feature.
+     *
+     * @param string $sec
+     * @param string $ptype
+     * @param string[][] $rules
+     */
+    public function addPolicies(string $sec, string $ptype, array $rules): void
+    {
+        $cols = [];
+        $i = 0;
+
+        foreach ($rules as $rule) {
+            $temp['`ptype`'] = $ptype;
+            foreach ($rule as $key => $value) {
+                $temp['`v'. strval($key) . '`'] = $value;
+            }
+            $cols[$i++] = $temp ?? [];
+            $temp = [];
+        }
+        $entities = $this->table->newEntity($cols);
+        $this->table->saveMany($entities);
+    }
+
+    /**
+     * Removes policy rules from the storage.
+     * This is part of the Auto-Save feature.
+     *
+     * @param string $sec
+     * @param string $ptype
+     * @param string[][] $rules
+     */
+    public function removePolicies(string $sec, string $ptype, array $rules): void
+    {
+        $this->table->getConnection()->transactional(function () use ($ptype, $rules) {
+            foreach ($rules as $rule) {
+                $entity = $this->table->find();
+
+                foreach ($rule as $key => $value) {
+                    $entity->where(['v' . strval($key) => $value]);
+                }
+                $entity = $entity->first();
+                $this->table->delete($entity, ['atomic' => false]);
+            }
+        });
     }
 
     protected function getTable()
