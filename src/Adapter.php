@@ -5,6 +5,7 @@ namespace CasbinAdapter\Cake;
 use Casbin\Exceptions\CasbinException;
 use Casbin\Persist\Adapter as AdapterContract;
 use Casbin\Persist\BatchAdapter as BatchAdapterContract;
+use Casbin\Persist\UpdatableAdapter as UpdatableAdapterContract;
 use Casbin\Persist\AdapterHelper;
 use Cake\ORM\TableRegistry;
 use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
@@ -14,7 +15,7 @@ use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
  *
  * @author techlee@qq.com
  */
-class Adapter implements AdapterContract, BatchAdapterContract
+class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapterContract
 {
     use AdapterHelper;
 
@@ -132,6 +133,30 @@ class Adapter implements AdapterContract, BatchAdapterContract
                 $this->table->delete($entity, ['atomic' => false]);
             }
         });
+    }
+
+    /**
+     * Updates a policy rule from storage.
+     * This is part of the Auto-Save feature.
+     *
+     * @param string $sec
+     * @param string $ptype
+     * @param string[] $oldRule
+     * @param string[] $newPolicy
+     */
+    public function updatePolicy(string $sec, string $ptype, array $oldRule, array $newPolicy): void
+    {
+        $entity = $this->table->find()->where(['ptype' => $ptype]);
+        foreach ($oldRule as $k => $v) {
+            $entity->where(['v' . $k => $v]);
+        }
+        $first = $entity->first();
+
+        foreach ($newPolicy as $k => $v) {
+            $key = 'v' . $k;
+            $first->$key = $v;
+        }
+        $this->table->save($first);
     }
 
     protected function getTable()
