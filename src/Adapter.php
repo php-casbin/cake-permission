@@ -6,6 +6,10 @@ use Casbin\Exceptions\CasbinException;
 use Casbin\Persist\Adapter as AdapterContract;
 use Casbin\Persist\BatchAdapter as BatchAdapterContract;
 use Casbin\Persist\UpdatableAdapter as UpdatableAdapterContract;
+use Casbin\Persist\FilteredAdapter as FilteredAdapterContract;
+use Casbin\Model\Model;
+use Casbin\Persist\Adapters\Filter;
+use Casbin\Exceptions\InvalidFilterTypeException;
 use Casbin\Persist\AdapterHelper;
 use Cake\ORM\TableRegistry;
 use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
@@ -15,11 +19,16 @@ use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
  *
  * @author techlee@qq.com
  */
-class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapterContract
+class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapterContract, FilteredAdapterContract
 {
     use AdapterHelper;
 
     protected $table;
+
+    /**
+     * @var bool
+     */
+    private $filtered = false;
 
     public function __construct()
     {
@@ -157,6 +166,64 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
             $first->$key = $v;
         }
         $this->table->save($first);
+    }
+
+    /**
+     * Loads only policy rules that match the filter.
+     *
+     * @param Model $model
+     * @param mixed $filter
+     */
+    public function loadFilteredPolicy(Model $model, $filter): void
+    {
+        $entity = $this->table->find();
+        
+        if (is_string($filter)) {
+            $entity = $entity->epilog('WHERE ' . $filter);
+        } elseif ($filter instanceof Filter) {
+            foreach ($filter->p as $k => $v) {
+                $where[$v] = $filter->g[$k];
+                $entity = $entity->where([$v => $filter->g[$k]]);
+            }
+        } elseif ($filter instanceof \Closure) {
+            $entity = $entity->where($filter);
+        } else {
+            throw new InvalidFilterTypeException('invalid filter type');
+        }
+        $rows = $entity->all();
+        
+        foreach ($rows as $row) {
+            unset($row->id);
+            $row = $row->toArray();
+            $row = array_filter($row, function ($value) {
+                return !is_null($value) && $value !== '';
+            });
+            $line = implode(', ', array_filter($row, function ($val) {
+                return '' != $val && !is_null($val);
+            }));
+            $this->loadPolicyLine(trim($line), $model);
+        }
+        $this->setFiltered(true);
+    }
+
+    /**
+     * Returns true if the loaded policy has been filtered.
+     *
+     * @return bool
+     */
+    public function isFiltered(): bool
+    {
+        return $this->filtered;
+    }
+
+    /**
+     * Sets filtered parameter.
+     *
+     * @param bool $filtered
+     */
+    public function setFiltered(bool $filtered): void
+    {
+        $this->filtered = $filtered;
     }
 
     protected function getTable()
