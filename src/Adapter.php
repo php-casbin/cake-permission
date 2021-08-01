@@ -82,7 +82,7 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
 
     public function removePolicy($sec, $ptype, $rule): void
     {
-        $entity = $this->table->newEntity();
+        $entity = $this->table->newEmptyEntity();
 
         foreach ($rule as $key => $value) {
             $entity->set('v'.strval($key), $value);
@@ -117,7 +117,7 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
             $cols[$i++] = $temp ?? [];
             $temp = [];
         }
-        $entities = $this->table->newEntity($cols);
+        $entities = $this->table->newEntities($cols);
         $this->table->saveMany($entities);
     }
 
@@ -166,6 +166,24 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
             $first->$key = $v;
         }
         $this->table->save($first);
+    }
+
+    /**
+     * UpdatePolicies updates some policy rules to storage, like db, redis.
+     *
+     * @param string $sec
+     * @param string $ptype
+     * @param string[][] $oldRules
+     * @param string[][] $newRules
+     * @return void
+     */
+    public function updatePolicies(string $sec, string $ptype, array $oldRules, array $newRules): void
+    {
+        $this->table->getConnection()->transactional(function () use ($sec, $ptype, $oldRules, $newRules) {
+            foreach ($oldRules as $i => $oldRule) {
+                $this->updatePolicy($sec, $ptype, $oldRule, $newRules[$i]);
+            }
+        });
     }
 
     /**
@@ -228,8 +246,6 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
 
     protected function getTable()
     {
-        return  TableRegistry::getTableLocator()->get('CasbinRule', [
-            'className' => CasbinRuleTable::class,
-        ]);
+        return  TableRegistry::getTableLocator()->get('CasbinRule');
     }
 }

@@ -4,13 +4,14 @@ namespace CasbinAdapter\Cake\Tests;
 
 use PHPUnit\Framework\TestCase;
 use \Cake\ORM\TableRegistry;
-use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
 use Cake\Datasource\ConnectionManager;
 use CasbinAdapter\Cake\Casbin;
-use Cake\Filesystem\File;
-use Cake\Filesystem\Folder;
 use Casbin\Persist\Adapters\Filter;
 use Casbin\Exceptions\InvalidFilterTypeException;
+use Cake\Core\Configure;
+use Cake\Core\Configure\Engine\PhpConfig;
+
+define('CONFIG', dirname(__DIR__) . '/vendor/cakephp/cakephp/config/');
 
 class DatabaseAdapterTest extends TestCase
 {
@@ -18,6 +19,10 @@ class DatabaseAdapterTest extends TestCase
 
     protected function getEnforcer()
     {
+        Configure::config('default', new PhpConfig());
+        Configure::write('App', [
+            'namespace' => ''
+        ]);
         $this->initConfig();
         $casbin = new Casbin();
         $casbin->init();
@@ -41,29 +46,16 @@ class DatabaseAdapterTest extends TestCase
             'database' => 'cake_adapter',
             'encoding' => 'utf8mb4',
             'timezone' => 'UTC',
-            'cacheMetadata' => true,
+            'cacheMetadata' => false,
         ]);
 
-        $casbin = new File(__DIR__ . '/casbin.php');
-        
-        if ($casbin->exists()) {
-            $dir = new Folder(dirname(__DIR__) . '/vendor/cakephp/app/config/', true);
-            $casbin->copy($dir->path . DS . $casbin->name);
-        }
-
-        $casbinModel = new File(__DIR__ . '/casbin-model.conf');
-
-        if ($casbinModel->exists()) {
-            $dir = new Folder(dirname(__DIR__) . '/vendor/cakephp/app/config/', true);
-            $casbinModel->copy($dir->path . DS . $casbinModel->name);
-        }
+        copy(__DIR__ . '/casbin.php', dirname(__DIR__) . '/vendor/cakephp/cakephp/config/casbin.php');
+        copy(__DIR__ . '/casbin-model.conf', dirname(__DIR__) . '/vendor/cakephp/cakephp/config/casbin-model.conf');
     }
 
     protected function getTable()
     {
-        return TableRegistry::getTableLocator()->get('CasbinRule', [
-            'className' => CasbinRuleTable::class,
-        ]);
+        return TableRegistry::getTableLocator()->get('CasbinRule');
     }
 
     protected function initDb()
@@ -155,6 +147,35 @@ class DatabaseAdapterTest extends TestCase
             ['bob', 'data2', 'write'],
             ['bob', 'data2', 'read']
         );
+
+        $this->assertEquals([
+            ['alice', 'data1', 'write'],
+            ['bob', 'data2', 'read'],
+            ['data2_admin', 'data2', 'read'],
+            ['data2_admin', 'data2', 'write'],
+        ], $e->getPolicy());
+    }
+
+    public function testUpdatePolicies()
+    {
+        $e = $this->getEnforcer();
+        $this->assertEquals([
+            ['alice', 'data1', 'read'],
+            ['bob', 'data2', 'write'],
+            ['data2_admin', 'data2', 'read'],
+            ['data2_admin', 'data2', 'write'],
+        ], $e->getPolicy());
+
+        $oldPolicies = [
+            ['alice', 'data1', 'read'],
+            ['bob', 'data2', 'write']
+        ];
+        $newPolicies = [
+            ['alice', 'data1', 'write'],
+            ['bob', 'data2', 'read']
+        ];
+
+        $e->updatePolicies($oldPolicies, $newPolicies);
 
         $this->assertEquals([
             ['alice', 'data1', 'write'],
