@@ -3,7 +3,7 @@
     colors="true"
     processIsolation="false"
     stopOnFailure="false"
-    bootstrap="vendor/cakephp/app/tests/bootstrap.php"
+    bootstrap="vendor/autoload.php"
     >
 
     <!-- Add any additional test suites you want to run here -->
