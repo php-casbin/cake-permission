@@ -62,13 +62,13 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
 
     public function savePolicy($model): void
     {
-        foreach ($model->model['p'] as $ptype => $ast) {
+        foreach ($model['p'] as $ptype => $ast) {
             foreach ($ast->policy as $rule) {
                 $this->savePolicyLine($ptype, $rule);
             }
         }
 
-        foreach ($model->model['g'] as $ptype => $ast) {
+        foreach ($model['g'] as $ptype => $ast) {
             foreach ($ast->policy as $rule) {
                 $this->savePolicyLine($ptype, $rule);
             }

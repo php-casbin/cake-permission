@@ -182,16 +182,16 @@
         },
         {
             "name": "casbin/casbin",
-            "version": "v3.7.0",
+            "version": "v3.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-casbin/php-casbin.git",
-                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b"
+                "reference": "ad35666742008b0105688ec3fbc69894f01cb2c3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/a3d99663905d8211b9e4510578ed6c5800efb29b",
-                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b",
+                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/ad35666742008b0105688ec3fbc69894f01cb2c3",
+                "reference": "ad35666742008b0105688ec3fbc69894f01cb2c3",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -238,7 +238,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-casbin/php-casbin/issues",
-                "source": "https://github.com/php-casbin/php-casbin/tree/v3.7.0"
+                "source": "https://github.com/php-casbin/php-casbin/tree/v3.8.0"
             },
             "funding": [
                 {
@@ -246,7 +246,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2021-08-09T11:57:38+00:00"
+            "time": "2021-08-24T02:27:43+00:00"
         },
         {
             "name": "composer/ca-bundle",
