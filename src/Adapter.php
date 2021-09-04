@@ -37,9 +37,9 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
 
     public function savePolicyLine($ptype, array $rule)
     {
-        $col['`ptype`'] = $ptype;
+        $col['ptype'] = $ptype;
         foreach ($rule as $key => $value) {
-            $col['`v'.strval($key).'`'] = $value;
+            $col['v' . strval($key)] = $value;
         }
 
         $entity = $this->table->newEntity($col);
@@ -107,14 +107,13 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
     public function addPolicies(string $sec, string $ptype, array $rules): void
     {
         $cols = [];
-        $i = 0;
 
         foreach ($rules as $rule) {
-            $temp['`ptype`'] = $ptype;
+            $temp['ptype'] = $ptype;
             foreach ($rule as $key => $value) {
-                $temp['`v'. strval($key) . '`'] = $value;
+                $temp['v' . strval($key)] = $value;
             }
-            $cols[$i++] = $temp ?? [];
+            $cols[] = $temp;
             $temp = [];
         }
         $entities = $this->table->newEntities($cols);
