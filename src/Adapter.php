@@ -186,6 +186,60 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
     }
 
     /**
+     * UpdateFilteredPolicies deletes old rules and adds new rules.
+     *
+     * @param string $sec
+     * @param string $ptype
+     * @param array $newPolicies
+     * @param integer $fieldIndex
+     * @param string ...$fieldValues
+     * @return array
+     */
+    public function updateFilteredPolicies(string $sec, string $ptype, array $newPolicies, int $fieldIndex, string ...$fieldValues): array
+    {
+        $where['ptype'] = $ptype;
+
+        foreach ($fieldValues as $fieldValue) {
+            $suffix = $fieldIndex++;
+            if (!is_null($fieldValue) && $fieldValue !== '') {
+                $where['v' . $suffix] = $fieldValue;
+            }
+        }
+
+        $newP = [];
+        $oldP = [];
+        foreach ($newPolicies as $newRule) {
+            $col['ptype'] = $ptype;
+            foreach ($newRule as $key => $value) {
+                $col['v' . strval($key)] = $value;
+            }
+            $newP[] = $col;
+        }
+
+        $this->table->getConnection()->transactional(function () use ($where, $newP, &$oldP) {
+            $oldRules = $this->table->find()->where($where);
+            $oldP = $oldRules->all()->toArray();
+
+            foreach ($oldP as &$item) {
+                unset($item->id);
+                $item = $item->toArray();
+                $item = array_filter($item, function ($value) {
+                    return !is_null($value) && $value !== '';
+                });
+                unset($item['ptype']);
+            }
+            
+            $oldRules->delete()->execute();
+
+            $entities = $this->table->newEntities($newP);
+            $this->table->saveMany($entities);
+        });
+
+        // return deleted rules
+        return $oldP;
+    }
+
+    /**
      * Loads only policy rules that match the filter.
      *
      * @param Model $model
