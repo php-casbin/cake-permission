@@ -91,9 +91,55 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
         $this->table->delete($entity);
     }
 
-    public function removeFilteredPolicy($sec, $ptype, $fieldIndex, ...$fieldValues) :void
+    /**
+     * @param string $sec
+     * @param string $ptype
+     * @param int $fieldIndex
+     * @param string|null ...$fieldValues
+     * @return array
+     * @throws Throwable
+     */
+    public function _removeFilteredPolicy(string $sec, string $ptype, int $fieldIndex, ?string ...$fieldValues): array
     {
-        throw new CasbinException('not implemented');
+        $removedRules = [];
+        $this->table->getConnection()->transactional(function () use ($ptype, $fieldIndex, $fieldValues, &$removedRules) {
+            $conditions = ['ptype' => $ptype];
+            $entity = $this->table->find();
+
+            foreach ($fieldValues as $value) {
+                if (!is_null($value) && $value !== '') {
+                    $conditions['v' . strval($fieldIndex)] = $value;
+                }
+                $fieldIndex++;
+            }
+
+            $removedRules = [];
+            $rows = $entity->where($conditions);
+            $rows = $entity->all();
+            foreach ($rows as $row) {
+                unset($row->id);
+                unset($row->ptype);
+                $removedRules[] = $this->filterRule($row->toArray());
+            }
+            $this->table->deleteAll($conditions);
+        });
+
+        return $removedRules;
+    }
+
+    /**
+     * RemoveFilteredPolicy removes policy rules that match the filter from the storage.
+     * This is part of the Auto-Save feature.
+     *
+     * @param string $sec
+     * @param string $ptype
+     * @param int $fieldIndex
+     * @param string ...$fieldValues
+     * @throws Exception|Throwable
+     */
+    public function removeFilteredPolicy(string $sec, string $ptype, int $fieldIndex, string ...$fieldValues): void
+    {
+        $this->_removeFilteredPolicy($sec, $ptype, $fieldIndex, ...$fieldValues);
     }
 
     /**
@@ -186,57 +232,22 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
     }
 
     /**
-     * UpdateFilteredPolicies deletes old rules and adds new rules.
-     *
      * @param string $sec
      * @param string $ptype
-     * @param array $newPolicies
-     * @param integer $fieldIndex
+     * @param array $newRules
+     * @param int $fieldIndex
      * @param string ...$fieldValues
      * @return array
+     * @throws Throwable
      */
-    public function updateFilteredPolicies(string $sec, string $ptype, array $newPolicies, int $fieldIndex, string ...$fieldValues): array
+    public function updateFilteredPolicies(string $sec, string $ptype, array $newRules, int $fieldIndex, ?string ...$fieldValues): array
     {
-        $where['ptype'] = $ptype;
-
-        foreach ($fieldValues as $fieldValue) {
-            $suffix = $fieldIndex++;
-            if (!is_null($fieldValue) && $fieldValue !== '') {
-                $where['v' . $suffix] = $fieldValue;
-            }
-        }
-
-        $newP = [];
-        $oldP = [];
-        foreach ($newPolicies as $newRule) {
-            $col['ptype'] = $ptype;
-            foreach ($newRule as $key => $value) {
-                $col['v' . strval($key)] = $value;
-            }
-            $newP[] = $col;
-        }
-
-        $this->table->getConnection()->transactional(function () use ($where, $newP, &$oldP) {
-            $oldRules = $this->table->find()->where($where);
-            $oldP = $oldRules->all()->toArray();
-
-            foreach ($oldP as &$item) {
-                unset($item->id);
-                $item = $item->toArray();
-                $item = array_filter($item, function ($value) {
-                    return !is_null($value) && $value !== '';
-                });
-                unset($item['ptype']);
-            }
-            
-            $oldRules->delete()->execute();
-
-            $entities = $this->table->newEntities($newP);
-            $this->table->saveMany($entities);
+        $oldRules = [];
+        $this->table->getConnection()->transactional(function () use ($sec, $ptype, $newRules, $fieldIndex, $fieldValues, &$oldRules) {
+            $oldRules = $this->_removeFilteredPolicy($sec, $ptype, $fieldIndex, ...$fieldValues);
+            $this->addPolicies($sec, $ptype, $newRules);
         });
-
-        // return deleted rules
-        return $oldP;
+        return $oldRules;
     }
 
     /**
@@ -275,6 +286,26 @@ class Adapter implements AdapterContract, BatchAdapterContract, UpdatableAdapter
             $this->loadPolicyLine(trim($line), $model);
         }
         $this->setFiltered(true);
+    }
+
+    /**
+     * Filter the rule.
+     *
+     * @param array $rule
+     * @return array
+     */
+    public function filterRule(array $rule): array
+    {
+        $rule = array_values($rule);
+
+        $i = count($rule) - 1;
+        for (; $i >= 0; $i--) {
+            if ($rule[$i] != "" && !is_null($rule[$i])) {
+                break;
+            }
+        }
+
+        return array_slice($rule, 0, $i + 1);
     }
 
     /**
