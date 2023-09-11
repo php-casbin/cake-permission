@@ -1,4 +1,4 @@
-name: build
+name: test
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: cake_adapter
+          MYSQL_DATABASE: cake-permission
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -23,14 +23,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [ 7.3, 7.4 ]
-        stability: [ prefer-lowest, prefer-stable ]
+        php: [7.3, 7.4, 8.0, 8.1, 8.2]
+        stability: [prefer-stable]
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -73,10 +73,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ test, upload-coverage ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.17'
+          node-version: 'lts/*'
 
       - name: Run semantic-release
         env:

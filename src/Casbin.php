@@ -1,6 +1,6 @@
 <?php
 
-namespace CasbinAdapter\Cake;
+namespace Cake\Permission;
 
 use Casbin\Model\Model;
 use Casbin\Enforcer;

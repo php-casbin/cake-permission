@@ -1,8 +1,10 @@
-# Cake-Casbin
+# Cake-Permission
 
-[![Latest Stable Version](https://poser.pugx.org/casbin/cake-adapter/v/stable)](https://packagist.org/packages/casbin/cake-adapter)
-[![Total Downloads](https://poser.pugx.org/casbin/cake-adapter/downloads)](https://packagist.org/packages/casbin/cake-adapter)
-[![License](https://poser.pugx.org/casbin/cake-adapter/license)](https://packagist.org/packages/casbin/cake-adapter)
+[![Test](https://github.com/php-casbin/cake-permission/workflows/build/badge.svg?branch=master)](https://github.com/php-casbin/cake-permission/actions)
+[![Coverage Status](https://coveralls.io/repos/github/php-casbin/cake-permission/badge.svg)](https://coveralls.io/github/php-casbin/cake-permission)
+[![Latest Stable Version](https://poser.pugx.org/casbin/cake-adapter/v/stable)](https://packagist.org/packages/casbin/cake-permission)
+[![Total Downloads](https://poser.pugx.org/casbin/cake-adapter/downloads)](https://packagist.org/packages/casbin/cake-permission)
+[![License](https://poser.pugx.org/casbin/cake-adapter/license)](https://packagist.org/packages/casbin/cake-permission)
 
 Use Casbin in CakePHP Framework, Casbin is a powerful and efficient open-source access control library.
 
@@ -11,7 +13,7 @@ Use Casbin in CakePHP Framework, Casbin is a powerful and efficient open-source 
 Require this package in the `composer.json` of your CakePHP project. This will download the package.
 
 ```
-composer require casbin/cake-adapter
+composer require casbin/cake-permission
 ```
 
 create config file `config/casbin.php` for Casbin:
@@ -32,7 +34,7 @@ return [
         ],
 
         // Cake-casbin adapter .
-        'adapter' => '\CasbinAdapter\Cake\Adapter',
+        'adapter' => '\Cake\Permission\Adapter',
 
         /*
          * Cake-casbin database setting.
@@ -72,7 +74,7 @@ $sub = 'alice'; // the user that wants to access a resource.
 $obj = 'data1'; // the resource that is going to be accessed.
 $act = 'read'; // the operation that the user performs on the resource.
 
-$casbin = new \CasbinAdapter\Cake\Casbin();
+$casbin = new \Cake\Permission\Casbin();
 
 if (true === $casbin->enforce($sub, $obj, $act)) {
     // permit alice to read data1

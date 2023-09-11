@@ -1,11 +1,11 @@
 <?php
 
-namespace CasbinAdapter\Cake\Tests;
+namespace Cake\Permission\Tests;
 
 use PHPUnit\Framework\TestCase;
 use \Cake\ORM\TableRegistry;
 use Cake\Datasource\ConnectionManager;
-use CasbinAdapter\Cake\Casbin;
+use Cake\Permission\Casbin;
 use Casbin\Persist\Adapters\Filter;
 use Casbin\Exceptions\InvalidFilterTypeException;
 use Cake\Core\Configure;
@@ -39,11 +39,11 @@ class DatabaseAdapterTest extends TestCase
             'className' => 'Cake\Database\Connection',
             'driver' => 'Cake\Database\Driver\Mysql',
             'persistent' => false,
-            'host' => '127.0.0.1',
-            'username' => 'root',
-            'password' => '',
-            'port' => '3306',
-            'database' => 'cake_adapter',
+            'host' => getenv('DB_HOST') ? getenv('DB_HOST') : '127.0.0.1',
+            'username' => getenv('DB_USERNAME') ? getenv('DB_USERNAME') : 'root',
+            'password' => getenv('DB_PASSWORD') ? getenv('DB_PASSWORD') : '',
+            'port' => getenv('DB_PORT') ? getenv('DB_PORT') : '3306',
+            'database' => getenv('DB_DATABASE') ? getenv('DB_DATABASE') : 'cake-permission',
             'encoding' => 'utf8mb4',
             'timezone' => 'UTC',
             'cacheMetadata' => false,

@@ -1,6 +1,6 @@
 <?php
 
-namespace CasbinAdapter\Cake\Model\Entity;
+namespace Cake\Permission\Model\Entity;
 
 use Cake\ORM\Entity;
 

@@ -13,7 +13,7 @@ return [
         ],
 
         // Cake-casbin adapter .
-        'adapter' => '\CasbinAdapter\Cake\Adapter',
+        'adapter' => '\Cake\Permission\Adapter',
 
         /*
          * Cake-casbin database setting.
