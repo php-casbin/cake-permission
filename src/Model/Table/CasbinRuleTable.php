@@ -1,9 +1,9 @@
 <?php
 
-namespace CasbinAdapter\Cake\Model\Table;
+namespace Cake\Permission\Model\Table;
 
 use Cake\ORM\Table;
-use CasbinAdapter\Cake\Model\Entity\CasbinRule;
+use Cake\Permission\Model\Entity\CasbinRule;
 
 class CasbinRuleTable extends Table
 {

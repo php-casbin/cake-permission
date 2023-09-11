@@ -1,6 +1,6 @@
 <?php
 
-namespace CasbinAdapter\Cake;
+namespace Cake\Permission;
 
 use Casbin\Exceptions\CasbinException;
 use Casbin\Persist\Adapter as AdapterContract;
@@ -12,7 +12,7 @@ use Casbin\Persist\Adapters\Filter;
 use Casbin\Exceptions\InvalidFilterTypeException;
 use Casbin\Persist\AdapterHelper;
 use Cake\ORM\TableRegistry;
-use CasbinAdapter\Cake\Model\Table\CasbinRuleTable;
+use Cake\Permission\Model\Table\CasbinRuleTable;
 
 /**
  * Adapter.
