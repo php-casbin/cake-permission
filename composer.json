@@ -1,5 +1,5 @@
 {
-    "name": "casbin/cake-adapter",
+    "name": "casbin/cake-permission",
     "keywords": ["casbin", "cakephp", "casbin-adapter", "database"],
     "description": "Use casbin in CakePHP. ",
     "authors": [
