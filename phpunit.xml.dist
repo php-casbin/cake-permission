@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-    colors="true"
-    processIsolation="false"
-    stopOnFailure="false"
-    bootstrap="vendor/autoload.php"
-    >
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         backupGlobals="false"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd">
 
     <!-- Add any additional test suites you want to run here -->
     <testsuites>
@@ -13,15 +14,21 @@
         </testsuite>
     </testsuites>
 
+    <coverage includeUncoveredFiles="true"
+              pathCoverage="false"
+              ignoreDeprecatedCodeUnits="true"
+              disableCodeCoverageIgnore="true">
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/html" lowUpperBound="50" highLowerBound="90"/>
+        </report>
+    </coverage>
+
     <!-- Ignore vendor tests in code coverage reports -->
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
-    
-    <logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-        <log type="coverage-html" target="build/html"/>
-    </logging>
+    <source>
+        <include>
+            <directory>./src</directory>
+        </include>
+    </source>
+
 </phpunit>
