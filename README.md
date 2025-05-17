@@ -1,12 +1,12 @@
 # Cake-Permission
 
-[![Test](https://github.com/php-casbin/cake-permission/workflows/test/badge.svg?branch=master)](https://github.com/php-casbin/cake-permission/actions)
+[![Test](https://github.com/php-casbin/cake-permission/actions/workflows/test.yml/badge.svg)](https://github.com/php-casbin/cake-permission/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/php-casbin/cake-permission/badge.svg)](https://coveralls.io/github/php-casbin/cake-permission)
 [![Latest Stable Version](https://poser.pugx.org/casbin/cake-permission/v/stable)](https://packagist.org/packages/casbin/cake-permission)
 [![Total Downloads](https://poser.pugx.org/casbin/cake-permission/downloads)](https://packagist.org/packages/casbin/cake-permission)
 [![License](https://poser.pugx.org/casbin/cake-permission/license)](https://packagist.org/packages/casbin/cake-permission)
 
-Use Casbin in CakePHP Framework, Casbin is a powerful and efficient open-source access control library.
+Use Casbin in [CakePHP](https://github.com/cakephp/cakephp) Framework, Casbin is a powerful and efficient open-source access control library.
 
 ### Installation
 
